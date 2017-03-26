@@ -1,2 +1,1 @@
-# test
-这仅仅是测试！
+Angular1x配合ui-router和ocLazyLoad插件进行按需加载js
