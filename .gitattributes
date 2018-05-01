@@ -1,0 +1,4 @@
+*.css linguist-language=angular
+*.less linguist-language=angular
+*.js linguist-language=angular
+*.html linguist-language=angular
