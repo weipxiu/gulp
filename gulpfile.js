@@ -41,7 +41,7 @@ gulp.task("imageMin",function(){
 //安装js压缩模块 npm i gulp-uglify --save-dev
 gulp.task("scriptmin",function(){
     //pipe后面对应的地址就是将前面路径文件拷贝复制到哪里去
-    gulp.src("src/js/*.js")
+    gulp.src(["src/js/*.js","!src/js/not.js"])
         .pipe(scriptmin())
         .pipe(gulp.dest("dist/js"))
 });
