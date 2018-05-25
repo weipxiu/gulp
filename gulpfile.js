@@ -83,3 +83,23 @@ gulp.task("watch", function () {
 
 //如果直接执行 gulp 那么就是运行任务名称为‘default’的任务,后面数组代表所需要执行的任务列表
 gulp.task('default', ["copyHtml", "gulpless", "imageMin", "scriptmin"]);
+
+
+//stream-combiner2模块下面代码可打印gulp报错信息
+var combiner = require('stream-combiner2');
+var uglify = require('gulp-uglify');
+var gulp = require('gulp');
+
+gulp.task('test', function() {
+  var combined = combiner.obj([
+    gulp.src('bootstrap/js/*.js'),
+    uglify(),
+    gulp.dest('public/bootstrap')
+  ]);
+
+  // any errors in the above streams will get caught
+  // by this listener, instead of being thrown:
+  combined.on('error', console.error.bind(console));
+
+  return combined;
+});
