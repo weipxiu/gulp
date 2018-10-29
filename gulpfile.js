@@ -1,8 +1,10 @@
 var gulp = require('gulp');
 var imagemin = require('gulp-imagemin'); //引入图片压缩模块
 var scriptmin = require('gulp-uglify'); //引入js压缩模块
+var pump = require('pump');//依照gulp-uglify官网说明配合gulp-uglify
 var gulpless = require('gulp-less'); //引入less转换模块
 var concat = require('gulp-concat'); //引入合并代码模块
+var babel = require('gulp-babel'); //引入ES6转ES5模块
 
 /*
 gulp.task -- 定义任务
@@ -48,21 +50,34 @@ gulp.task("imageMin", function () {
 
 // 压缩js
 //安装js压缩模块 npm i gulp-uglify --save-dev
-gulp.task("scriptmin", function () {
-    //pipe后面对应的地址就是将前面路径文件拷贝复制到哪里去
-    gulp.src(["src/js/*.js", "!src/js/not.js"])
-        .pipe(scriptmin())
-        .pipe(gulp.dest("dist/js"))
+gulp.task('scriptmin', function (cb) {
+    pump([
+            gulp.src(["src/js/*.js", "!src/js/not.js"]),
+            uglify(),
+            gulp.dest("dist/js")
+        ],
+        cb
+    );
 });
 
 // 转行less
-//安装js压缩模块 npm i gulp-less --save-dev
+//安装gulpless压缩模块 npm i gulp-less --save-dev
 gulp.task("gulpless", function () {
     //pipe后面对应的地址就是将前面路径文件拷贝复制到哪里去
     gulp.src("src/css/*.less")
         .pipe(gulpless())
         .pipe(gulp.dest("dist/css"))
 });
+
+//ES6转换转ES5(babel-v7版本)
+gulp.task('babel', () =>
+    gulp.src('src/js/*.js')
+        .pipe(babel({
+            presets: ['@babel/env']
+        }))
+        .pipe(gulp.dest('dist/js'))
+);
+
 
 //代码合并
 //安装 npm i gulp-concat --save-dev
@@ -78,11 +93,12 @@ gulp.task("watch", function () {
     gulp.watch("src/*.html", ["copyHtml"]);
     gulp.watch("src/css/*.less", ["gulpless"]);
     gulp.watch("src/images/*", ["imageMin"]);
-    gulp.watch("src/js/*.js", ["scriptmin"]);
+    gulp.watch("src/js/*.js", ["scriptmin", "babel"]);
 })
 
+
 //如果直接执行 gulp 那么就是运行任务名称为‘default’的任务,后面数组代表所需要执行的任务列表
-gulp.task('default', ["copyHtml", "gulpless", "imageMin", "scriptmin"]);
+gulp.task('default', ["copyHtml", "gulpless", "imageMin", "scriptmin", "babel"]);
 
 
 //stream-combiner2模块下面代码可打印gulp报错信息
@@ -90,16 +106,16 @@ var combiner = require('stream-combiner2');
 var uglify = require('gulp-uglify');
 var gulp = require('gulp');
 
-gulp.task('test', function() {
-  var combined = combiner.obj([
-    gulp.src('bootstrap/js/*.js'),
-    uglify(),
-    gulp.dest('public/bootstrap')
-  ]);
+gulp.task('test', function () {
+    var combined = combiner.obj([
+        gulp.src('bootstrap/js/*.js'),
+        uglify(),
+        gulp.dest('public/bootstrap')
+    ]);
 
-  // any errors in the above streams will get caught
-  // by this listener, instead of being thrown:
-  combined.on('error', console.error.bind(console));
+    // any errors in the above streams will get caught
+    // by this listener, instead of being thrown:
+    combined.on('error', console.error.bind(console));
 
-  return combined;
+    return combined;
 });
